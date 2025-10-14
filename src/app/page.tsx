@@ -1,103 +1,99 @@
-import Image from "next/image";
+"use client"
+
+import { useState } from "react"
+import { Dashboard } from "@/components/dashboard"
+import { FileUpload } from "@/components/file-upload"
+import { Button } from "@/components/ui/button"
+import { ProcessedCSVData } from "@/lib/csv-processor"
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [dashboardData, setDashboardData] = useState<ProcessedCSVData | null>(null)
+  const [selectedDate, setSelectedDate] = useState({ month: "September", year: 2025 })
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleDataProcessed = (data: ProcessedCSVData, dateSelection?: { month: string; year: number }) => {
+    setDashboardData(data)
+    if (dateSelection) {
+      setSelectedDate(dateSelection)
+    }
+  }
+
+  const handleLoadCSVFiles = async () => {
+    try {
+      const response = await fetch('/api/process-csv')
+      if (response.ok) {
+        const data = await response.json()
+        setDashboardData(data)
+      } else {
+        console.error('Failed to load CSV files')
+      }
+    } catch (error) {
+      console.error('Error loading CSV files:', error)
+    }
+  }
+
+  // Sample data - fallback when no CSV data is processed
+  const sampleData = {
+    month: "September",
+    year: 2025,
+    summary: "The work put in to convert intros to memberships is paying off (up nearly 40%!). While there's an increase in leads (solid numbers here!), intro sales aren't following (but maybe they trail by a few week?). This seems like a really solid swing and good momentum for October.",
+    metrics: {
+      newMembers: { value: 29, change: 26 },
+      leadToIntroConversion: { value: 24.8, change: -3 },
+      introsSold: { value: 66, change: 0 },
+      introToMemberConversion: { value: 22.1, change: 39 },
+      totalSales: { value: 38874, change: 14 },
+      avgLeadsPerDay: { value: 8.6, change: 28 },
+      introToPackConversion: { value: 14.9, change: -6 }
+    }
+  }
+
+  const currentData = dashboardData || sampleData
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {!dashboardData && (
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <div className="w-full max-w-4xl">
+            <div className="mb-12 text-center">
+              <div className="mb-6">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg">
+                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                  Fitness Studio Analytics
+                </h1>
+                <p className="mt-3 text-lg text-gray-600">
+                  Transform your data into actionable insights
+                </p>
+              </div>
+            </div>
+            <FileUpload onDataProcessed={handleDataProcessed} />
+            
+            <div className="mt-8 text-center">
+              <div className="mb-4 text-sm text-gray-600">
+                Or load the CSV files directly from the september-2025 folder:
+              </div>
+              <Button 
+                onClick={handleLoadCSVFiles}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
+              >
+                Load CSV Files from Folder
+              </Button>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
+      
+      {dashboardData && (
+        <Dashboard 
+          month={selectedDate.month}
+          year={selectedDate.year}
+          summary={dashboardData.summary}
+          metrics={dashboardData.metrics}
+        />
+      )}
     </div>
-  );
+  )
 }
