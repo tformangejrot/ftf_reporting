@@ -55,63 +55,36 @@ export function MetricCard({
   const cardVariant = getCardVariant()
 
   return (
-    <Card className={`border-0 bg-white/70 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 ${
+    <Card className={`transition-all duration-200 hover:shadow-md ${
       cardVariant === "warning" ? "border-l-4 border-l-yellow-500" :
       cardVariant === "success" ? "border-l-4 border-l-green-500" :
       cardVariant === "destructive" ? "border-l-4 border-l-red-500" :
       cardVariant === "neutral" ? "border-l-4 border-l-gray-500" :
       "border-l-4 border-l-blue-500"
     }`}>
-      <CardContent className="p-8">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <p className="text-3xl font-bold text-gray-900 mb-2">
-              {formatValue(value)}
-            </p>
-            <Badge 
-              variant={getChangeVariant()} 
-              className="flex w-fit items-center gap-1 mb-4 text-sm font-semibold"
-            >
-              {getIcon()}
-              {Math.abs(change)}%
-            </Badge>
-            <p className="text-sm font-medium text-gray-600 leading-relaxed">
-              {title}
-            </p>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between space-y-0 pb-2">
+          <p className="text-sm font-medium text-muted-foreground">
+            {title}
+          </p>
+          <div className="flex items-center gap-1">
+            {getIcon()}
+            <span className={`text-xs font-medium ${
+              getChangeVariant() === "success" ? "text-green-600" :
+              getChangeVariant() === "destructive" ? "text-red-600" :
+              "text-gray-600"
+            }`}>
+              {change > 0 ? "+" : ""}{change}%
+            </span>
           </div>
-          <div className={`ml-4 flex h-12 w-12 items-center justify-center rounded-xl ${
-            cardVariant === "warning" ? "bg-yellow-100" :
-            cardVariant === "success" ? "bg-green-100" :
-            cardVariant === "destructive" ? "bg-red-100" :
-            cardVariant === "neutral" ? "bg-gray-100" :
-            "bg-blue-100"
-          }`}>
-            {cardVariant === "warning" && (
-              <svg className="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            )}
-            {cardVariant === "success" && (
-              <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            )}
-            {cardVariant === "destructive" && (
-              <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            )}
-            {cardVariant === "neutral" && (
-              <svg className="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            )}
-            {cardVariant === "default" && (
-              <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            )}
+        </div>
+        <div>
+          <div className="text-2xl font-bold">
+            {formatValue(value)}
           </div>
+          <p className="text-xs text-muted-foreground">
+            {change > 0 ? "Trending up" : change < 0 ? "Trending down" : "No change"} from last month
+          </p>
         </div>
       </CardContent>
     </Card>

@@ -50,34 +50,34 @@ export default function Home() {
   const currentData = dashboardData || sampleData
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-background">
       {!dashboardData && (
         <div className="flex min-h-screen items-center justify-center p-4">
           <div className="w-full max-w-4xl">
-            <div className="mb-12 text-center">
+            <div className="mb-8 text-center">
               <div className="mb-6">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg">
-                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold tracking-tight">
                   Fitness Studio Analytics
                 </h1>
-                <p className="mt-3 text-lg text-gray-600">
+                <p className="mt-2 text-muted-foreground">
                   Transform your data into actionable insights
                 </p>
               </div>
             </div>
             <FileUpload onDataProcessed={handleDataProcessed} />
-            
-            <div className="mt-8 text-center">
-              <div className="mb-4 text-sm text-gray-600">
+
+            <div className="mt-6 text-center">
+              <div className="mb-3 text-sm text-muted-foreground">
                 Or load the CSV files directly from the september-2025 folder:
               </div>
-              <Button 
+              <Button
                 onClick={handleLoadCSVFiles}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
+                variant="outline"
               >
                 Load CSV Files from Folder
               </Button>
@@ -92,6 +92,10 @@ export default function Home() {
           year={selectedDate.year}
           summary={dashboardData.summary}
           metrics={dashboardData.metrics}
+          chartData={dashboardData.chartData}
+          newMembersChartData={dashboardData.newMembersChartData}
+          cumulativeMembersChartData={dashboardData.cumulativeMembersChartData}
+          totalSalesChartData={dashboardData.totalSalesChartData}
         />
       )}
     </div>

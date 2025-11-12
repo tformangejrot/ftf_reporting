@@ -1,3 +1,5 @@
+import { generateLeadsIntroSalesChartData, generateNewMembersChartData, generateCumulativeMembersChartData, generateTotalSalesChartData } from './chart-data-processor'
+
 export interface DashboardMetrics {
   newMembers: { value: number; change: number }
   leadToIntroConversion: { value: number; change: number }
@@ -11,6 +13,10 @@ export interface DashboardMetrics {
 export interface ProcessedCSVData {
   metrics: DashboardMetrics
   summary: string
+  chartData?: any[] // Will be ChartDataPoint[] but avoiding circular import
+  newMembersChartData?: any[] // Will be NewMembersChartDataPoint[] but avoiding circular import
+  cumulativeMembersChartData?: any[] // Will be CumulativeMembersChartDataPoint[] but avoiding circular import
+  totalSalesChartData?: any[] // Will be TotalSalesChartDataPoint[] but avoiding circular import
 }
 
 // Utility functions for date parsing and filtering
@@ -80,7 +86,10 @@ export const MEMBERSHIP_PATTERNS = [
   /8[\s-]?class\s+membership/i,
   /12[\s-]?class\s+membership/i,
   /unlimited\s+membership/i,
-  /monthly\s+membership/i
+  /monthly\s+membership/i,
+  /membership.*\$269/i,
+  /membership.*\$189/i,
+  /membership.*student\s+discount/i
 ]
 
 export const PACKAGE_PATTERNS = [
@@ -162,6 +171,32 @@ export function calculateIntrosSold(csvContent: string, month: number, year: num
   return data.filter(row => {
     const date = parseCSVDate(row['Purchase date'])
     return isInMonth(date, month, year)
+  }).length
+}
+
+export function calculateTotalIntroSalesForPeriod(csvContent: string, month: number, year: number): number {
+  const data = parseCSV(csvContent)
+  
+  // Filter for 3-month period starting 2 months before target month
+  const startMonth = month - 2 >= 0 ? month - 2 : month + 10
+  const startYear = month - 2 >= 0 ? year : year - 1
+  
+  return data.filter(row => {
+    const date = parseCSVDate(row['Purchase date'])
+    return isInThreeMonthPeriod(date, startMonth, startYear)
+  }).length
+}
+
+export function calculateTotalIntroSalesForPeriodPrev(csvContent: string, month: number, year: number): number {
+  const data = parseCSV(csvContent)
+  
+  // Filter for previous 3-month period
+  const startMonth = month - 3 >= 0 ? month - 3 : month + 9
+  const startYear = month - 3 >= 0 ? year : year - 1
+  
+  return data.filter(row => {
+    const date = parseCSVDate(row['Purchase date'])
+    return isInThreeMonthPeriod(date, startMonth, startYear)
   }).length
 }
 
@@ -247,7 +282,7 @@ export function calculateLeadToIntroConversionPrev(csvContent: string, month: nu
   return totalLeads > 0 ? Math.round((introLeads / totalLeads) * 1000) / 10 : 0
 }
 
-export function calculateIntroToMemberConversion(csvContent: string, month: number, year: number): number {
+export function calculateIntroToMemberConversion(csvContent: string, month: number, year: number, totalIntroSales: number): number {
   const data = parseCSV(csvContent)
   
   // Filter for 3-month period starting 2 months before target month
@@ -258,19 +293,17 @@ export function calculateIntroToMemberConversion(csvContent: string, month: numb
     return isInThreeMonthPeriod(date, startMonth, startYear)
   })
   
-  // Count total intro conversions in 3-month period
-  const totalConversions = threeMonthData.length
-  
   // Count conversions to memberships
   const memberConversions = threeMonthData.filter(row => {
     const convertedTo = row['Converted to']
     return matchesPattern(convertedTo, MEMBERSHIP_PATTERNS)
   }).length
   
-  return totalConversions > 0 ? Math.round((memberConversions / totalConversions) * 1000) / 10 : 0
+  // Calculate rate based on total intro sales, not total conversions
+  return totalIntroSales > 0 ? Math.round((memberConversions / totalIntroSales) * 1000) / 10 : 0
 }
 
-export function calculateIntroToMemberConversionPrev(csvContent: string, month: number, year: number): number {
+export function calculateIntroToMemberConversionPrev(csvContent: string, month: number, year: number, totalIntroSales: number): number {
   const data = parseCSV(csvContent)
   
   // Filter for previous 3-month period
@@ -281,19 +314,17 @@ export function calculateIntroToMemberConversionPrev(csvContent: string, month: 
     return isInThreeMonthPeriod(date, startMonth, startYear)
   })
   
-  // Count total intro conversions in 3-month period
-  const totalConversions = threeMonthData.length
-  
   // Count conversions to memberships
   const memberConversions = threeMonthData.filter(row => {
     const convertedTo = row['Converted to']
     return matchesPattern(convertedTo, MEMBERSHIP_PATTERNS)
   }).length
   
-  return totalConversions > 0 ? Math.round((memberConversions / totalConversions) * 1000) / 10 : 0
+  // Calculate rate based on total intro sales, not total conversions
+  return totalIntroSales > 0 ? Math.round((memberConversions / totalIntroSales) * 1000) / 10 : 0
 }
 
-export function calculateIntroToPackConversion(csvContent: string, month: number, year: number): number {
+export function calculateIntroToPackConversion(csvContent: string, month: number, year: number, totalIntroSales: number): number {
   const data = parseCSV(csvContent)
   
   // Filter for 3-month period starting 2 months before target month
@@ -304,19 +335,17 @@ export function calculateIntroToPackConversion(csvContent: string, month: number
     return isInThreeMonthPeriod(date, startMonth, startYear)
   })
   
-  // Count total intro conversions in 3-month period
-  const totalConversions = threeMonthData.length
-  
   // Count conversions to packages
   const packConversions = threeMonthData.filter(row => {
     const convertedTo = row['Converted to']
     return matchesPattern(convertedTo, PACKAGE_PATTERNS)
   }).length
   
-  return totalConversions > 0 ? Math.round((packConversions / totalConversions) * 1000) / 10 : 0
+  // Calculate rate based on total intro sales, not total conversions
+  return totalIntroSales > 0 ? Math.round((packConversions / totalIntroSales) * 1000) / 10 : 0
 }
 
-export function calculateIntroToPackConversionPrev(csvContent: string, month: number, year: number): number {
+export function calculateIntroToPackConversionPrev(csvContent: string, month: number, year: number, totalIntroSales: number): number {
   const data = parseCSV(csvContent)
   
   // Filter for previous 3-month period
@@ -327,16 +356,14 @@ export function calculateIntroToPackConversionPrev(csvContent: string, month: nu
     return isInThreeMonthPeriod(date, startMonth, startYear)
   })
   
-  // Count total intro conversions in 3-month period
-  const totalConversions = threeMonthData.length
-  
   // Count conversions to packages
   const packConversions = threeMonthData.filter(row => {
     const convertedTo = row['Converted to']
     return matchesPattern(convertedTo, PACKAGE_PATTERNS)
   }).length
   
-  return totalConversions > 0 ? Math.round((packConversions / totalConversions) * 1000) / 10 : 0
+  // Calculate rate based on total intro sales, not total conversions
+  return totalIntroSales > 0 ? Math.round((packConversions / totalIntroSales) * 1000) / 10 : 0
 }
 
 export function calculateTotalSales(csvContent: string, month: number, year: number): number {
@@ -412,6 +439,7 @@ export function processCSVData(
   leadsCustomers: string,
   introConversions: string,
   payments: string,
+  membershipSalesWithRenewals: string,
   month: number,
   year: number
 ): ProcessedCSVData {
@@ -420,8 +448,11 @@ export function processCSVData(
   const introsSold = calculateIntrosSold(introSales, month, year)
   const avgLeadsPerDay = calculateAvgLeadsPerDay(leadsCustomers, month, year)
   const leadToIntroConversion = calculateLeadToIntroConversion(leadsCustomers, month, year)
-  const introToMemberConversion = calculateIntroToMemberConversion(introConversions, month, year)
-  const introToPackConversion = calculateIntroToPackConversion(introConversions, month, year)
+  
+  // Get total intro sales for the 3-month period for conversion rate calculations
+  const totalIntroSalesForPeriod = calculateTotalIntroSalesForPeriod(introSales, month, year)
+  const introToMemberConversion = calculateIntroToMemberConversion(introConversions, month, year, totalIntroSalesForPeriod)
+  const introToPackConversion = calculateIntroToPackConversion(introConversions, month, year, totalIntroSalesForPeriod)
   const totalSales = calculateTotalSales(payments, month, year)
   
   // Calculate previous month metrics
@@ -429,8 +460,11 @@ export function processCSVData(
   const introsSoldPrev = calculateIntrosSoldPrev(introSales, month, year)
   const avgLeadsPerDayPrev = calculateAvgLeadsPerDayPrev(leadsCustomers, month, year)
   const leadToIntroConversionPrev = calculateLeadToIntroConversionPrev(leadsCustomers, month, year)
-  const introToMemberConversionPrev = calculateIntroToMemberConversionPrev(introConversions, month, year)
-  const introToPackConversionPrev = calculateIntroToPackConversionPrev(introConversions, month, year)
+  
+  // Get total intro sales for the previous 3-month period
+  const totalIntroSalesForPeriodPrev = calculateTotalIntroSalesForPeriodPrev(introSales, month, year)
+  const introToMemberConversionPrev = calculateIntroToMemberConversionPrev(introConversions, month, year, totalIntroSalesForPeriodPrev)
+  const introToPackConversionPrev = calculateIntroToPackConversionPrev(introConversions, month, year, totalIntroSalesForPeriodPrev)
   const totalSalesPrev = calculateTotalSalesPrev(payments, month, year)
   
   // Calculate percentage changes
@@ -466,9 +500,30 @@ export function processCSVData(
   }
   
   const summary = "Data processed from CSV files for September 2025. Metrics calculated based on the specified criteria for each KPI, with month-over-month changes calculated from August 2025 data."
+
+  // Generate chart data for the leads vs intro sales chart
+  const chartData = generateLeadsIntroSalesChartData(introSales, leadsCustomers, month, year)
   
+  // Generate chart data for the new members chart
+  const newMembersChartData = generateNewMembersChartData(membershipSales, month, year)
+  
+  // Generate chart data for the cumulative members chart
+  const cumulativeMembersChartData = generateCumulativeMembersChartData(
+    membershipSalesWithRenewals, 
+    membershipSales, 
+    month, 
+    year
+  )
+  
+  // Generate chart data for the total sales chart
+  const totalSalesChartData = generateTotalSalesChartData(payments, month, year)
+
   return {
     metrics,
-    summary
+    summary,
+    chartData,
+    newMembersChartData,
+    cumulativeMembersChartData,
+    totalSalesChartData
   }
 }

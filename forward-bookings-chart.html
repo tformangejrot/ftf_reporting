@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forward-Looking Bookings Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .file-input {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border: 2px dashed #ddd;
+        }
+        .file-input input {
+            width: 100%;
+        }
+        .chart-container {
+            position: relative;
+            height: 500px;
+            margin-top: 20px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #3b82f6;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .legend-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Forward-Looking Bookings Chart</h1>
+        <p class="subtitle">30-day view showing upcoming bookings from each historical date</p>
+        
+        <div class="info-box">
+            <h3>How to read this chart:</h3>
+            <ul style="margin: 5px 0; padding-left: 20px;">
+                <li><strong>X-axis:</strong> Historical dates (last 30 days, ending today)</li>
+                <li><strong>Y-axis:</strong> Number of forward bookings as of that date</li>
+                <li><strong>Dark bars:</strong> Bookings 1-5 days out (made on or before that date)</li>
+                <li><strong>Light bars:</strong> Bookings 6+ days out (made on or before that date)</li>
+                <li><strong>Example:</strong> On Sept 20, the bar shows bookings made by Sept 20 for:
+                    <ul style="margin-top: 5px;">
+                        <li>Dark: Sept 21-25 (1-5 days out)</li>
+                        <li>Light: Sept 26+ (6+ days out)</li>
+                    </ul>
+                </li>
+                <li><strong>Use case:</strong> Track booking momentum - are people booking further in advance over time?</li>
+            </ul>
+        </div>
+
+        <div class="file-input">
+            <label for="csvFile"><strong>Upload CSV File:</strong></label>
+            <input type="file" id="csvFile" accept=".csv" />
+        </div>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-label">Total Bookings (Next 5 Days)</div>
+                <div class="stat-value" id="stat-near"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Bookings (6+ Days)</div>
+                <div class="stat-value" id="stat-far"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Future Bookings</div>
+                <div class="stat-value" id="stat-total"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Today's Date</div>
+                <div class="stat-value" id="stat-today" style="font-size: 16px;"></div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="bookingsChart"></canvas>
+        </div>
+
+        <div class="legend-container">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #1e40af;"></div>
+                <span>1-5 Days Out</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #93c5fd;"></div>
+                <span>6+ Days Out</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart = null;
+
+        function parseCSVDate(dateStr) {
+            // Parse dates like "2025-10-17, 7:30 PM"
+            if (!dateStr) return null;
+            
+            try {
+                const parts = dateStr.split(', ');
+                if (parts.length === 2) {
+                    const [datePart, timePart] = parts;
+                    // Parse the date part
+                    const dateObj = new Date(datePart);
+                    
+                    // Set time to midnight for consistent date comparison
+                    dateObj.setHours(0, 0, 0, 0);
+                    
+                    return dateObj;
+                }
+                return null;
+            } catch (e) {
+                console.error('Error parsing date:', dateStr, e);
+                return null;
+            }
+        }
+
+        function parseCSV(csvContent) {
+            const lines = csvContent.split(/\r\n|\n/);
+            if (lines.length === 0) return [];
+
+            // Parse headers
+            let headersLine = lines[0];
+            if (headersLine.charCodeAt(0) === 0xFEFF) {
+                headersLine = headersLine.substring(1);
+            }
+
+            const headers = [];
+            let inQuote = false;
+            let currentHeader = '';
+            
+            for (let i = 0; i < headersLine.length; i++) {
+                const char = headersLine[i];
+                if (char === '"') {
+                    inQuote = !inQuote;
+                } else if (char === ',' && !inQuote) {
+                    headers.push(currentHeader.trim().replace(/^"|"$/g, ''));
+                    currentHeader = '';
+                } else {
+                    currentHeader += char;
+                }
+            }
+            headers.push(currentHeader.trim().replace(/^"|"$/g, ''));
+
+            // Parse data rows
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+
+                const row = {};
+                let currentField = '';
+                let headerIndex = 0;
+                inQuote = false;
+
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    if (char === '"') {
+                        inQuote = !inQuote;
+                        if (inQuote && line[j + 1] === '"') {
+                            currentField += '"';
+                            j++;
+                        }
+                    } else if (char === ',' && !inQuote) {
+                        if (headers[headerIndex]) {
+                            row[headers[headerIndex]] = currentField.trim().replace(/^"|"$/g, '');
+                        }
+                        currentField = '';
+                        headerIndex++;
+                    } else {
+                        currentField += char;
+                    }
+                }
+                if (headers[headerIndex]) {
+                    row[headers[headerIndex]] = currentField.trim().replace(/^"|"$/g, '');
+                }
+                data.push(row);
+            }
+            return data;
+        }
+
+        function processBookingsData(csvData) {
+            // Set today as the reference point (midnight)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Generate last 30 days (including today)
+            const days = [];
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                days.push(date);
+            }
+
+            // Process all bookings with both visit and sale dates
+            const bookings = csvData
+                .map(row => ({
+                    visitDate: parseCSVDate(row['Visit date']),
+                    saleDate: parseCSVDate(row['Sale date'])
+                }))
+                .filter(booking => booking.visitDate && booking.saleDate);
+
+            // For each historical day, count bookings as they stood on that day
+            const chartData = days.map(historicalDate => {
+                const near = []; // 1-5 days out
+                const far = [];  // 6+ days out
+
+                bookings.forEach(booking => {
+                    // Only count bookings that were MADE on or before the historical date
+                    if (booking.saleDate <= historicalDate) {
+                        // And the visit date must be AFTER the historical date
+                        if (booking.visitDate > historicalDate) {
+                            const daysOut = Math.floor((booking.visitDate - historicalDate) / (1000 * 60 * 60 * 24));
+                            
+                            if (daysOut >= 1 && daysOut <= 5) {
+                                near.push(booking);
+                            } else if (daysOut >= 6) {
+                                far.push(booking);
+                            }
+                        }
+                    }
+                });
+
+                return {
+                    date: historicalDate,
+                    near: near.length,
+                    far: far.length,
+                    total: near.length + far.length
+                };
+            });
+
+            return { chartData, today };
+        }
+
+        function formatDate(date) {
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${month}/${day}`;
+        }
+
+        function formatDateLong(date) {
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+        }
+
+        function renderChart(chartData, today) {
+            const ctx = document.getElementById('bookingsChart');
+            
+            // Destroy existing chart
+            if (chart) {
+                chart.destroy();
+            }
+
+            // Update stats
+            const todayData = chartData[chartData.length - 1];
+            document.getElementById('stat-near').textContent = todayData.near;
+            document.getElementById('stat-far').textContent = todayData.far;
+            document.getElementById('stat-total').textContent = todayData.total;
+            document.getElementById('stat-today').textContent = formatDateLong(today);
+            document.getElementById('stats').style.display = 'grid';
+
+            const labels = chartData.map(d => formatDate(d.date));
+            const nearData = chartData.map(d => d.near);
+            const farData = chartData.map(d => d.far);
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '1-5 Days Out',
+                            data: nearData,
+                            backgroundColor: '#1e40af',
+                            borderColor: '#1e3a8a',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '6+ Days Out',
+                            data: farData,
+                            backgroundColor: '#93c5fd',
+                            borderColor: '#60a5fa',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Forward-Looking Bookings by Historical Date',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const index = context[0].dataIndex;
+                                    return formatDateLong(chartData[index].date);
+                                },
+                                afterTitle: function(context) {
+                                    const index = context[0].dataIndex;
+                                    const isToday = index === chartData.length - 1;
+                                    return isToday ? '(Today)' : '';
+                                },
+                                footer: function(context) {
+                                    const index = context[0].dataIndex;
+                                    return `Total: ${chartData[index].total} bookings`;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false // We're using custom legend
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Historical Date (Last 30 Days)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Future Bookings',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                stepSize: 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // File upload handler
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csvContent = e.target.result;
+                const csvData = parseCSV(csvContent);
+                const { chartData, today } = processBookingsData(csvData);
+                renderChart(chartData, today);
+            };
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+</html>
+

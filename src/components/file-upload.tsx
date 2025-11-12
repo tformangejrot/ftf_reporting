@@ -29,6 +29,12 @@ const REQUIRED_FILES = [
     description: 'For new members count'
   },
   {
+    key: 'membershipSalesWithRenewals',
+    name: 'Membership Sales (With Renewals)',
+    filename: 'momence--membership-sales-export-withrenewals.csv',
+    description: 'For total membership count including renewals'
+  },
+  {
     key: 'introSales',
     name: 'Intro Offers Sales',
     filename: 'momence-intro-offers-sales-report.csv',
@@ -149,6 +155,7 @@ export function FileUpload({ onDataProcessed }: FileUploadProps) {
         fileContents.leadsCustomers,
         fileContents.introConversions,
         fileContents.payments,
+        fileContents.membershipSalesWithRenewals,
         monthNumber,
         dateSelection.year
       )
