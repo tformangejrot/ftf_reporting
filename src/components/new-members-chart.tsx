@@ -82,7 +82,7 @@ export function NewMembersChart({ data }: NewMembersChartProps) {
                 stroke="#60a5fa" 
                 strokeDasharray="5 5"
                 strokeWidth={2}
-                label={{ value: "Target (30)", position: "topLeft" }}
+                label={{ value: "Target (30)", position: "top" }}
               />
               
               {/* New Members Bar */}

@@ -1,4 +1,13 @@
-import { generateLeadsIntroSalesChartData, generateNewMembersChartData, generateCumulativeMembersChartData, generateTotalSalesChartData } from './chart-data-processor'
+import {
+  generateLeadsIntroSalesChartData,
+  generateNewMembersChartData,
+  generateCumulativeMembersChartData,
+  generateTotalSalesChartData,
+  type ChartDataPoint,
+  type NewMembersChartDataPoint,
+  type CumulativeMembersChartDataPoint,
+  type TotalSalesChartDataPoint
+} from './chart-data-processor'
 
 export interface DashboardMetrics {
   newMembers: { value: number; change: number }
@@ -13,11 +22,13 @@ export interface DashboardMetrics {
 export interface ProcessedCSVData {
   metrics: DashboardMetrics
   summary: string
-  chartData?: any[] // Will be ChartDataPoint[] but avoiding circular import
-  newMembersChartData?: any[] // Will be NewMembersChartDataPoint[] but avoiding circular import
-  cumulativeMembersChartData?: any[] // Will be CumulativeMembersChartDataPoint[] but avoiding circular import
-  totalSalesChartData?: any[] // Will be TotalSalesChartDataPoint[] but avoiding circular import
+  chartData?: ChartDataPoint[]
+  newMembersChartData?: NewMembersChartDataPoint[]
+  cumulativeMembersChartData?: CumulativeMembersChartDataPoint[]
+  totalSalesChartData?: TotalSalesChartDataPoint[]
 }
+
+export type CSVRow = Record<string, string>
 
 // Utility functions for date parsing and filtering
 export function parseCSVDate(dateStr: string): Date | null {
@@ -105,7 +116,7 @@ export function matchesPattern(text: string, patterns: RegExp[]): boolean {
 }
 
 // CSV parsing functions
-export function parseCSV(csvContent: string): any[] {
+export function parseCSV(csvContent: string): CSVRow[] {
   const lines = csvContent.split('\n')
   
   // Parse CSV line properly handling quotes
@@ -135,16 +146,16 @@ export function parseCSV(csvContent: string): any[] {
   
   return lines.slice(1).map(line => {
     if (!line.trim()) return null
-    
+
     const values = parseCSVLine(line).map(v => v.replace(/"/g, ''))
-    const row: any = {}
+    const row: CSVRow = {}
     
     headers.forEach((header, index) => {
       row[header] = values[index] || ''
     })
     
     return row
-  }).filter(row => row !== null)
+  }).filter((row): row is CSVRow => row !== null)
 }
 
 // Metric calculation functions

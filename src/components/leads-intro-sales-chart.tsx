@@ -1,7 +1,6 @@
 import {
   ComposedChart,
   Bar,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -83,14 +82,14 @@ export function LeadsIntroSalesChart({ data }: LeadsIntroSalesChartProps) {
                 stroke="#3b82f6" 
                 strokeDasharray="5 5"
                 strokeWidth={2}
-                label={{ value: "Target Intro Sales (90)", position: "topLeft" }}
+                label={{ value: "Target Intro Sales (90)", position: "top" }}
               />
               <ReferenceLine 
                 y={270} 
                 stroke="#f59e0b" 
                 strokeDasharray="5 5"
                 strokeWidth={2}
-                label={{ value: "Target New Leads (270)", position: "topLeft" }}
+                label={{ value: "Target New Leads (270)", position: "top" }}
               />
               
               {/* Bars */}

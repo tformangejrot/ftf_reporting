@@ -31,24 +31,6 @@ export default function Home() {
     }
   }
 
-  // Sample data - fallback when no CSV data is processed
-  const sampleData = {
-    month: "September",
-    year: 2025,
-    summary: "The work put in to convert intros to memberships is paying off (up nearly 40%!). While there's an increase in leads (solid numbers here!), intro sales aren't following (but maybe they trail by a few week?). This seems like a really solid swing and good momentum for October.",
-    metrics: {
-      newMembers: { value: 29, change: 26 },
-      leadToIntroConversion: { value: 24.8, change: -3 },
-      introsSold: { value: 66, change: 0 },
-      introToMemberConversion: { value: 22.1, change: 39 },
-      totalSales: { value: 38874, change: 14 },
-      avgLeadsPerDay: { value: 8.6, change: 28 },
-      introToPackConversion: { value: 14.9, change: -6 }
-    }
-  }
-
-  const currentData = dashboardData || sampleData
-
   return (
     <div className="min-h-screen bg-background">
       {!dashboardData && (

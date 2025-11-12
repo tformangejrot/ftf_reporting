@@ -1,8 +1,8 @@
 import fs from 'fs'
 import path from 'path'
-import { processCSVData } from './csv-processor'
+import { processCSVData, type ProcessedCSVData } from './csv-processor'
 
-export async function loadAndProcessCSVFiles(): Promise<any> {
+export async function loadAndProcessCSVFiles(): Promise<ProcessedCSVData> {
   try {
     const csvDir = path.join(process.cwd(), 'september-2025')
     

@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { ArrowUp, ArrowDown, Minus } from "lucide-react"
 import { getMetricColor, getColorVariant, MetricType } from "@/lib/metric-utils"
 
@@ -7,7 +6,6 @@ interface MetricCardProps {
   title: string
   value: string | number
   change: number
-  changeLabel?: string
   metricType?: MetricType
   variant?: "default" | "success" | "warning" | "neutral" | "destructive"
 }
@@ -16,7 +14,6 @@ export function MetricCard({
   title, 
   value, 
   change, 
-  changeLabel, 
   metricType,
   variant 
 }: MetricCardProps) {

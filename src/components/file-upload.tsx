@@ -1,24 +1,18 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, type ChangeEvent } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Upload, FileText, CheckCircle, AlertCircle } from "lucide-react"
+import { Upload, CheckCircle, AlertCircle } from "lucide-react"
+import type { ProcessedCSVData } from "@/lib/csv-processor"
 
 interface FileUploadProps {
-  onDataProcessed: (data: any, dateSelection?: { month: string; year: number }) => void
+  onDataProcessed: (data: ProcessedCSVData, dateSelection?: { month: string; year: number }) => void
 }
 
 interface DateSelection {
   month: string
   year: number
-}
-
-interface FileStatus {
-  name: string
-  status: 'pending' | 'uploaded' | 'error'
-  content?: string
-  error?: string
 }
 
 const REQUIRED_FILES = [
@@ -58,7 +52,16 @@ const REQUIRED_FILES = [
     filename: 'momence-latest-payments-report.csv',
     description: 'For total sales calculation'
   }
-]
+] as const
+
+type RequiredFileKey = typeof REQUIRED_FILES[number]['key']
+
+interface FileStatus {
+  name: RequiredFileKey
+  status: 'pending' | 'uploaded' | 'error'
+  content?: string
+  error?: string
+}
 
 export function FileUpload({ onDataProcessed }: FileUploadProps) {
   const [fileStatuses, setFileStatuses] = useState<FileStatus[]>([])
@@ -68,7 +71,7 @@ export function FileUpload({ onDataProcessed }: FileUploadProps) {
     year: 2025
   })
 
-  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>, fileKey: string) => {
+  const handleFileUpload = useCallback((event: ChangeEvent<HTMLInputElement>, fileKey: RequiredFileKey) => {
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -126,44 +129,60 @@ export function FileUpload({ onDataProcessed }: FileUploadProps) {
 
   const processFiles = async () => {
     setIsProcessing(true)
-    
+
     try {
-      // Import the processing function
-      const { processCSVData } = await import('@/lib/csv-processor')
-      
-      // Get file contents
-      const fileContents = fileStatuses.reduce((acc, file) => {
+      const { processCSVData, getMonthNumber } = await import('@/lib/csv-processor')
+
+      const fileContents = fileStatuses.reduce<Partial<Record<RequiredFileKey, string>>>((acc, file) => {
         if (file.status === 'uploaded' && file.content) {
           acc[file.name] = file.content
         }
         return acc
-      }, {} as Record<string, string>)
+      }, {})
 
-      // Check if all required files are uploaded
       const missingFiles = REQUIRED_FILES.filter(file => !fileContents[file.key])
       if (missingFiles.length > 0) {
         throw new Error(`Missing files: ${missingFiles.map(f => f.name).join(', ')}`)
       }
 
-      // Process the data
-      const { getMonthNumber } = await import('@/lib/csv-processor')
+      const {
+        membershipSales,
+        introSales,
+        leadsCustomers,
+        introConversions,
+        payments,
+        membershipSalesWithRenewals
+      } = fileContents
+
+      if (
+        !membershipSales ||
+        !introSales ||
+        !leadsCustomers ||
+        !introConversions ||
+        !payments ||
+        !membershipSalesWithRenewals
+      ) {
+        throw new Error('Unable to read one or more required CSV files')
+      }
+
       const monthNumber = getMonthNumber(dateSelection.month)
-      
+
       const processedData = processCSVData(
-        fileContents.membershipSales,
-        fileContents.introSales,
-        fileContents.leadsCustomers,
-        fileContents.introConversions,
-        fileContents.payments,
-        fileContents.membershipSalesWithRenewals,
+        membershipSales,
+        introSales,
+        leadsCustomers,
+        introConversions,
+        payments,
+        membershipSalesWithRenewals,
         monthNumber,
         dateSelection.year
       )
 
       onDataProcessed(processedData, dateSelection)
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
       console.error('Error processing files:', error)
-      alert('Error processing files: ' + (error as Error).message)
+      alert(`Error processing files: ${message}`)
     } finally {
       setIsProcessing(false)
     }
@@ -173,7 +192,7 @@ export function FileUpload({ onDataProcessed }: FileUploadProps) {
     fileStatuses.some(f => f.name === file.key && f.status === 'uploaded')
   )
 
-  const getFileStatus = (fileKey: string) => {
+  const getFileStatus = (fileKey: RequiredFileKey) => {
     return fileStatuses.find(f => f.name === fileKey)?.status || 'pending'
   }
 
