@@ -7,6 +7,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -79,6 +80,17 @@ export function TotalSalesChart({ data }: TotalSalesChartProps) {
                 labelStyle={{ color: "#374151", fontWeight: "600" }}
               />
               <Legend />
+              
+              {/* Target Line */}
+              {data.length > 0 && data[0].targetTotalSales !== undefined && (
+                <ReferenceLine 
+                  y={data[0].targetTotalSales} 
+                  stroke="#3b82f6" 
+                  strokeDasharray="5 5"
+                  strokeWidth={2}
+                  label={{ value: `Target Total Sales ($${data[0].targetTotalSales.toLocaleString()})`, position: "top" }}
+                />
+              )}
               
               {/* Sales Categories - stacked in order from bottom to top */}
               <Bar 

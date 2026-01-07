@@ -17,6 +17,8 @@ export interface DashboardMetrics {
   totalSales: { value: number; change: number }
   avgLeadsPerDay: { value: number; change: number }
   introToPackConversion: { value: number; change: number }
+  packSales: { value: number; change: number }
+  membershipCancellations: { value: number; change: number }
 }
 
 export interface ProcessedCSVData {
@@ -409,6 +411,147 @@ export function calculateTotalSalesPrev(csvContent: string, month: number, year:
   return Math.round(prevMonthSales)
 }
 
+// Helper function to categorize sale (reused from chart-data-processor logic)
+function categorizeSale(category: string, item: string): string {
+  if (category === "Class") {
+    return "dropIn"
+  }
+  
+  if (category === "Subscription") {
+    if (item === "Unlimited 14 Day Intro Package") {
+      return "intro"
+    }
+    if (item.includes("Monthly")) {
+      return "membership"
+    }
+    if (item.includes("Lupit")) {
+      return "other"
+    }
+    return "other"
+  }
+  
+  if (category === "Appointment") {
+    if (item.includes("Private Lesson")) {
+      return "private"
+    }
+    if (item.includes("PARTY")) {
+      return "party"
+    }
+    return "other"
+  }
+  
+  if (category === "Pack") {
+    if (item === "New Flyer 3 Class Pack") {
+      return "intro"
+    }
+    return "pack"
+  }
+  
+  if (category === "Product" || category === "Payment plan installment" || category === "Gift card" || 
+      category === "Automatic penalty charge" || category === "On-demand") {
+    return "other"
+  }
+  
+  // Default to "other" for anything not covered
+  return "other"
+}
+
+export function calculatePackSales(csvContent: string, month: number, year: number): number {
+  const data = parseCSV(csvContent)
+  
+  return data.filter(row => {
+    const date = parseCSVDate(row['Date'])
+    return isInMonth(date, month, year) && row['Payment status'] === 'Succeeded'
+  }).filter(row => {
+    const category = categorizeSale(row['Category'], row['Item'])
+    return category === 'pack'
+  }).length
+}
+
+export function calculatePackSalesPrev(csvContent: string, month: number, year: number): number {
+  const data = parseCSV(csvContent)
+  const prevMonth = month === 0 ? 11 : month - 1
+  const prevYear = month === 0 ? year - 1 : year
+  
+  return data.filter(row => {
+    const date = parseCSVDate(row['Date'])
+    return isInMonth(date, prevMonth, prevYear) && row['Payment status'] === 'Succeeded'
+  }).filter(row => {
+    const category = categorizeSale(row['Category'], row['Item'])
+    return category === 'pack'
+  }).length
+}
+
+// Get set of active membership customer emails for a given month
+function getActiveMembershipEmails(csvContent: string, month: number, year: number): Set<string> {
+  const data = parseCSV(csvContent)
+  const emails = new Set<string>()
+  
+  data.forEach(row => {
+    const date = parseCSVDate(row['Bought Date/Time (GMT)'])
+    if (isInMonth(date, month, year)) {
+      const email = row['Customer Email']?.trim().toLowerCase()
+      if (email) {
+        emails.add(email)
+      }
+    }
+  })
+  
+  return emails
+}
+
+export function calculateMembershipCancellations(
+  membershipSalesWithRenewals: string,
+  month: number,
+  year: number
+): number {
+  const prevMonth = month === 0 ? 11 : month - 1
+  const prevYear = month === 0 ? year - 1 : year
+  
+  // Get emails from previous month
+  const prevMonthEmails = getActiveMembershipEmails(membershipSalesWithRenewals, prevMonth, prevYear)
+  
+  // Get emails from current month
+  const currentMonthEmails = getActiveMembershipEmails(membershipSalesWithRenewals, month, year)
+  
+  // Count emails that were in previous month but not in current month
+  let cancellations = 0
+  prevMonthEmails.forEach(email => {
+    if (!currentMonthEmails.has(email)) {
+      cancellations++
+    }
+  })
+  
+  return cancellations
+}
+
+export function calculateMembershipCancellationsPrev(
+  membershipSalesWithRenewals: string,
+  month: number,
+  year: number
+): number {
+  const prevMonth = month === 0 ? 11 : month - 1
+  const prevYear = month === 0 ? year - 1 : year
+  const prevPrevMonth = prevMonth === 0 ? 11 : prevMonth - 1
+  const prevPrevYear = prevMonth === 0 ? prevYear - 1 : prevYear
+  
+  // Get emails from month before previous
+  const prevPrevMonthEmails = getActiveMembershipEmails(membershipSalesWithRenewals, prevPrevMonth, prevPrevYear)
+  
+  // Get emails from previous month
+  const prevMonthEmails = getActiveMembershipEmails(membershipSalesWithRenewals, prevMonth, prevYear)
+  
+  // Count emails that were in prev-prev month but not in previous month
+  let cancellations = 0
+  prevPrevMonthEmails.forEach(email => {
+    if (!prevMonthEmails.has(email)) {
+      cancellations++
+    }
+  })
+  
+  return cancellations
+}
+
 // Main processing function
 export async function processDashboardData(): Promise<ProcessedCSVData> {
   try {
@@ -422,7 +565,9 @@ export async function processDashboardData(): Promise<ProcessedCSVData> {
       introToMemberConversion: { value: 22.1, change: 39 },
       totalSales: { value: 38874, change: 14 },
       avgLeadsPerDay: { value: 8.6, change: 28 },
-      introToPackConversion: { value: 14.9, change: -6 }
+      introToPackConversion: { value: 14.9, change: -6 },
+      packSales: { value: 33, change: 0 },
+      membershipCancellations: { value: 12, change: -10 }
     }
     
     const summary = "The work put in to convert intros to memberships is paying off (up nearly 40%!). While there's an increase in leads (solid numbers here!), intro sales aren't following (but maybe they trail by a few week?). This seems like a really solid swing and good momentum for October."
@@ -465,6 +610,8 @@ export function processCSVData(
   const introToMemberConversion = calculateIntroToMemberConversion(introConversions, month, year, totalIntroSalesForPeriod)
   const introToPackConversion = calculateIntroToPackConversion(introConversions, month, year, totalIntroSalesForPeriod)
   const totalSales = calculateTotalSales(payments, month, year)
+  const packSales = calculatePackSales(payments, month, year)
+  const membershipCancellations = calculateMembershipCancellations(membershipSalesWithRenewals, month, year)
   
   // Calculate previous month metrics
   const newMembersPrev = calculateNewMembersPrev(membershipSales, month, year)
@@ -477,6 +624,8 @@ export function processCSVData(
   const introToMemberConversionPrev = calculateIntroToMemberConversionPrev(introConversions, month, year, totalIntroSalesForPeriodPrev)
   const introToPackConversionPrev = calculateIntroToPackConversionPrev(introConversions, month, year, totalIntroSalesForPeriodPrev)
   const totalSalesPrev = calculateTotalSalesPrev(payments, month, year)
+  const packSalesPrev = calculatePackSalesPrev(payments, month, year)
+  const membershipCancellationsPrev = calculateMembershipCancellationsPrev(membershipSalesWithRenewals, month, year)
   
   // Calculate percentage changes
   const metrics: DashboardMetrics = {
@@ -507,6 +656,14 @@ export function processCSVData(
     introToPackConversion: { 
       value: introToPackConversion, 
       change: calculatePercentageChange(introToPackConversion, introToPackConversionPrev)
+    },
+    packSales: {
+      value: packSales,
+      change: calculatePercentageChange(packSales, packSalesPrev)
+    },
+    membershipCancellations: {
+      value: membershipCancellations,
+      change: calculatePercentageChange(membershipCancellations, membershipCancellationsPrev)
     }
   }
   

@@ -1,4 +1,5 @@
 import { parseCSV, parseCSVDate, isInMonth } from './csv-processor'
+import { getIntroSalesTarget, getLeadsPerDayTarget, getTotalMembershipsTarget, getTotalSalesTarget } from './targets'
 
 export interface ChartDataPoint {
   month: string
@@ -19,6 +20,7 @@ export interface CumulativeMembersChartDataPoint {
   retainedMembers: number
   newMembers: number
   totalMembers: number
+  targetTotalMembers?: number
 }
 
 export interface TotalSalesChartDataPoint {
@@ -31,6 +33,7 @@ export interface TotalSalesChartDataPoint {
   party: number
   other: number
   totalSales: number
+  targetTotalSales?: number
 }
 
 export function generateLeadsIntroSalesChartData(
@@ -43,6 +46,10 @@ export function generateLeadsIntroSalesChartData(
   const leadsData = parseCSV(leadsCustomersCSV)
   
   const chartData: ChartDataPoint[] = []
+  
+  // Get target for the selected month (targetMonth/targetYear)
+  const selectedMonthTarget = getIntroSalesTarget(targetYear, targetMonth)
+  const leadsPerDayTarget = getLeadsPerDayTarget()
   
   // Generate 13 months of data starting from the same month the prior year
   for (let i = -12; i <= 0; i++) {
@@ -64,6 +71,13 @@ export function generateLeadsIntroSalesChartData(
       return isInMonth(date, month, year)
     }).length
     
+    // Get target for this specific month (for intro sales)
+    const monthTarget = getIntroSalesTarget(year, month)
+    
+    // Calculate target for new leads based on days in month
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+    const monthLeadsTarget = leadsPerDayTarget * daysInMonth
+    
     // Format month label
     const monthLabel = formatMonthLabel(currentDate, targetYear)
     
@@ -71,8 +85,8 @@ export function generateLeadsIntroSalesChartData(
       month: monthLabel,
       introSales,
       newLeads,
-      targetIntroSales: 90,
-      targetNewLeads: 270
+      targetIntroSales: monthTarget,
+      targetNewLeads: monthLeadsTarget
     })
   }
   
@@ -126,6 +140,9 @@ export function generateCumulativeMembersChartData(
   
   const chartData: CumulativeMembersChartDataPoint[] = []
   
+  // Get target for the selected month (targetMonth/targetYear)
+  const selectedMonthTarget = getTotalMembershipsTarget(targetYear, targetMonth)
+  
   // Generate 13 months of data starting from the same month the prior year
   for (let i = -12; i <= 0; i++) {
     const currentDate = new Date(targetYear, targetMonth, 1)
@@ -156,7 +173,8 @@ export function generateCumulativeMembersChartData(
       month: monthLabel,
       retainedMembers,
       newMembers,
-      totalMembers
+      totalMembers,
+      targetTotalMembers: selectedMonthTarget
     })
   }
   
@@ -219,6 +237,9 @@ export function generateTotalSalesChartData(
   
   const chartData: TotalSalesChartDataPoint[] = []
   
+  // Get target for the selected month (targetMonth/targetYear)
+  const selectedMonthTarget = getTotalSalesTarget(targetYear, targetMonth)
+  
   // Generate 13 months of data starting from the same month the prior year
   for (let i = -12; i <= 0; i++) {
     const currentDate = new Date(targetYear, targetMonth, 1)
@@ -273,7 +294,8 @@ export function generateTotalSalesChartData(
     chartData.push({
       month: monthLabel,
       ...categories,
-      totalSales
+      totalSales,
+      targetTotalSales: selectedMonthTarget
     })
     
     if (year === targetYear && month === targetMonth) {

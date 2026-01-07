@@ -76,21 +76,25 @@ export function LeadsIntroSalesChart({ data }: LeadsIntroSalesChartProps) {
               />
               <Legend />
               
-              {/* Target Lines */}
-              <ReferenceLine 
-                y={90} 
-                stroke="#3b82f6" 
-                strokeDasharray="5 5"
-                strokeWidth={2}
-                label={{ value: "Target Intro Sales (90)", position: "top" }}
-              />
-              <ReferenceLine 
-                y={270} 
-                stroke="#f59e0b" 
-                strokeDasharray="5 5"
-                strokeWidth={2}
-                label={{ value: "Target New Leads (270)", position: "top" }}
-              />
+              {/* Target Lines - use the last data point's targets (which is the selected month) */}
+              {data.length > 0 && (
+                <>
+                  <ReferenceLine 
+                    y={data[data.length - 1].targetIntroSales} 
+                    stroke="#3b82f6" 
+                    strokeDasharray="5 5"
+                    strokeWidth={2}
+                    label={{ value: `Target Intro Sales (${data[data.length - 1].targetIntroSales})`, position: "top" }}
+                  />
+                  <ReferenceLine 
+                    y={data[data.length - 1].targetNewLeads} 
+                    stroke="#f59e0b" 
+                    strokeDasharray="5 5"
+                    strokeWidth={2}
+                    label={{ value: `Target New Leads (${data[data.length - 1].targetNewLeads})`, position: "top" }}
+                  />
+                </>
+              )}
               
               {/* Bars */}
               <Bar 

@@ -52,3 +52,5 @@ This will regenerate all the CSV files with new random data.
 - Prices match the real membership/class pricing structure
 - The data is designed to produce realistic-looking dashboard metrics
 
+
+

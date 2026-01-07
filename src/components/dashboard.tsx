@@ -7,6 +7,7 @@ import { NewMembersChart } from "./new-members-chart"
 import { CumulativeMembersChart } from "./cumulative-members-chart"
 import { TotalSalesChart } from "./total-sales-chart"
 import { ChartDataPoint, NewMembersChartDataPoint, CumulativeMembersChartDataPoint, TotalSalesChartDataPoint } from "@/lib/chart-data-processor"
+import { getMonthNumber } from "@/lib/csv-processor"
 
 interface DashboardProps {
   month: string
@@ -20,6 +21,8 @@ interface DashboardProps {
     totalSales: { value: number; change: number }
     avgLeadsPerDay: { value: number; change: number }
     introToPackConversion: { value: number; change: number }
+    packSales: { value: number; change: number }
+    membershipCancellations: { value: number; change: number }
   }
   chartData?: ChartDataPoint[]
   newMembersChartData?: NewMembersChartDataPoint[]
@@ -28,6 +31,7 @@ interface DashboardProps {
 }
 
 export function Dashboard({ month, year, summary, metrics, chartData, newMembersChartData, cumulativeMembersChartData, totalSalesChartData }: DashboardProps) {
+  const monthNumber = getMonthNumber(month)
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl">
@@ -91,42 +95,72 @@ export function Dashboard({ month, year, summary, metrics, chartData, newMembers
                   value={metrics.newMembers.value}
                   change={metrics.newMembers.change}
                   metricType="newMembers"
+                  month={monthNumber}
+                  year={year}
                 />
                 <MetricCard
                   title="Lead to Intro Conversion"
                   value={`${metrics.leadToIntroConversion.value}%`}
                   change={metrics.leadToIntroConversion.change}
                   metricType="leadToIntroConversion"
+                  month={monthNumber}
+                  year={year}
                 />
                 <MetricCard
                   title="Intros Sold"
                   value={metrics.introsSold.value}
                   change={metrics.introsSold.change}
                   metricType="introsSold"
+                  month={monthNumber}
+                  year={year}
                 />
                 <MetricCard
                   title="Intro to Member Conversion"
                   value={`${metrics.introToMemberConversion.value}%`}
                   change={metrics.introToMemberConversion.change}
                   metricType="introToMemberConversion"
+                  month={monthNumber}
+                  year={year}
                 />
                 <MetricCard
                   title="Total Sales"
                   value={metrics.totalSales.value}
                   change={metrics.totalSales.change}
                   metricType="totalSales"
+                  month={monthNumber}
+                  year={year}
                 />
                 <MetricCard
                   title="Avg. Leads per Day"
                   value={metrics.avgLeadsPerDay.value}
                   change={metrics.avgLeadsPerDay.change}
                   metricType="avgLeadsPerDay"
+                  month={monthNumber}
+                  year={year}
                 />
                 <MetricCard
                   title="Intro to Pack Conversion"
                   value={`${metrics.introToPackConversion.value}%`}
                   change={metrics.introToPackConversion.change}
                   metricType="introToPackConversion"
+                  month={monthNumber}
+                  year={year}
+                />
+                <MetricCard
+                  title="Pack Sales"
+                  value={metrics.packSales.value}
+                  change={metrics.packSales.change}
+                  metricType="packSales"
+                  month={monthNumber}
+                  year={year}
+                />
+                <MetricCard
+                  title="Membership Cancellations"
+                  value={metrics.membershipCancellations.value}
+                  change={metrics.membershipCancellations.change}
+                  metricType="membershipCancellations"
+                  month={monthNumber}
+                  year={year}
                 />
               </div>
             </TabsContent>

@@ -76,15 +76,6 @@ export function NewMembersChart({ data }: NewMembersChartProps) {
               />
               <Legend />
               
-              {/* Target Line */}
-              <ReferenceLine 
-                y={30} 
-                stroke="#60a5fa" 
-                strokeDasharray="5 5"
-                strokeWidth={2}
-                label={{ value: "Target (30)", position: "top" }}
-              />
-              
               {/* New Members Bar */}
               <Bar 
                 dataKey="newMembers" 

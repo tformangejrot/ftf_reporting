@@ -8,6 +8,8 @@ interface MetricCardProps {
   change: number
   metricType?: MetricType
   variant?: "default" | "success" | "warning" | "neutral" | "destructive"
+  month?: number
+  year?: number
 }
 
 export function MetricCard({ 
@@ -15,13 +17,15 @@ export function MetricCard({
   value, 
   change, 
   metricType,
-  variant 
+  variant,
+  month,
+  year
 }: MetricCardProps) {
   // Use threshold-based color if metricType is provided, otherwise use variant
   const getCardVariant = () => {
     if (metricType && variant === undefined) {
       const numericValue = typeof value === "number" ? value : parseFloat(value.toString()) || 0
-      const color = getMetricColor(metricType, numericValue)
+      const color = getMetricColor(metricType, numericValue, month, year)
       return getColorVariant(color)
     }
     return variant || "default"

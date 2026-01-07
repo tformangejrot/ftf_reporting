@@ -7,6 +7,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -74,6 +75,17 @@ export function CumulativeMembersChart({ data }: CumulativeMembersChartProps) {
                 labelStyle={{ color: "#374151", fontWeight: "600" }}
               />
               <Legend />
+              
+              {/* Target Line */}
+              {data.length > 0 && data[0].targetTotalMembers !== undefined && (
+                <ReferenceLine 
+                  y={data[0].targetTotalMembers} 
+                  stroke="#3b82f6" 
+                  strokeDasharray="5 5"
+                  strokeWidth={2}
+                  label={{ value: `Target Total Members (${data[0].targetTotalMembers})`, position: "top" }}
+                />
+              )}
               
               {/* Retained Members (bottom, light blue) */}
               <Bar 
