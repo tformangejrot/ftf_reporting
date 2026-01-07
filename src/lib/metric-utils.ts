@@ -1,3 +1,11 @@
+import {
+  getIntroSalesTarget,
+  getClassPacksTarget,
+  getTotalSalesTarget,
+  getLeadsPerDayTarget,
+  getHighIsGoodThresholds,
+} from './targets'
+
 export type MetricType = 
   | 'newMembers' 
   | 'introsSold' 
@@ -79,16 +87,6 @@ export function getMetricColor(
   if (metricType === 'introToPackConversion') {
     return 'gray'
   }
-
-  // Import targets helper dynamically to avoid circular dependencies
-  const {
-    getIntroSalesTarget,
-    getClassPacksTarget,
-    getTotalSalesTarget,
-    getLeadsPerDayTarget,
-    getHighIsGoodThresholds,
-    getCancellationsThresholds
-  } = require('./targets')
 
   // Metrics that use dynamic targets based on month/year
   if (month !== undefined && year !== undefined) {

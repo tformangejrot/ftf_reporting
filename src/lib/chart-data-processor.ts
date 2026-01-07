@@ -47,8 +47,7 @@ export function generateLeadsIntroSalesChartData(
   
   const chartData: ChartDataPoint[] = []
   
-  // Get target for the selected month (targetMonth/targetYear)
-  const selectedMonthTarget = getIntroSalesTarget(targetYear, targetMonth)
+  // Get leads per day target (fixed at 8)
   const leadsPerDayTarget = getLeadsPerDayTarget()
   
   // Generate 13 months of data starting from the same month the prior year
