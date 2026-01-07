@@ -10,21 +10,10 @@ import {
   ReferenceLine,
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
-interface ChartDataPoint {
-  month: string
-  membership: number
-  intro: number
-  dropIn: number
-  pack: number
-  private: number
-  party: number
-  other: number
-  totalSales: number
-}
+import { TotalSalesChartDataPoint } from "@/lib/chart-data-processor"
 
 interface TotalSalesChartProps {
-  data: ChartDataPoint[]
+  data: TotalSalesChartDataPoint[]
 }
 
 export function TotalSalesChart({ data }: TotalSalesChartProps) {

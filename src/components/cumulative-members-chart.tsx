@@ -10,16 +10,10 @@ import {
   ReferenceLine,
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
-interface ChartDataPoint {
-  month: string
-  retainedMembers: number
-  newMembers: number
-  totalMembers: number
-}
+import { CumulativeMembersChartDataPoint } from "@/lib/chart-data-processor"
 
 interface CumulativeMembersChartProps {
-  data: ChartDataPoint[]
+  data: CumulativeMembersChartDataPoint[]
 }
 
 export function CumulativeMembersChart({ data }: CumulativeMembersChartProps) {
