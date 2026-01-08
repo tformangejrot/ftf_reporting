@@ -76,6 +76,7 @@ const DEFAULT_TOTAL_MEMBERSHIPS = 30 // This is for new members, not total
 const DEFAULT_CLASS_PACKS = 33
 const DEFAULT_TOTAL_SALES = 45000
 const LEADS_PER_DAY = 8 // Fixed across all months
+const NEW_LEADS_PER_MONTH = 238 // Fixed monthly target for new leads
 
 export interface TargetThresholds {
   target: number
@@ -120,6 +121,13 @@ export function getTotalSalesTarget(year: number, month: number): number {
  */
 export function getLeadsPerDayTarget(): number {
   return LEADS_PER_DAY
+}
+
+/**
+ * Get the target for new leads per month (fixed at 238)
+ */
+export function getNewLeadsTarget(): number {
+  return NEW_LEADS_PER_MONTH
 }
 
 /**

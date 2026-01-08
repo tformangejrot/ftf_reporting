@@ -1,5 +1,5 @@
 import { parseCSV, parseCSVDate, isInMonth } from './csv-processor'
-import { getIntroSalesTarget, getLeadsPerDayTarget, getTotalMembershipsTarget, getTotalSalesTarget } from './targets'
+import { getIntroSalesTarget, getNewLeadsTarget, getTotalMembershipsTarget, getTotalSalesTarget } from './targets'
 
 export interface ChartDataPoint {
   month: string
@@ -47,8 +47,8 @@ export function generateLeadsIntroSalesChartData(
   
   const chartData: ChartDataPoint[] = []
   
-  // Get leads per day target (fixed at 8)
-  const leadsPerDayTarget = getLeadsPerDayTarget()
+  // Get new leads target (fixed at 238 per month)
+  const newLeadsTarget = getNewLeadsTarget()
   
   // Generate 13 months of data starting from the same month the prior year
   for (let i = -12; i <= 0; i++) {
@@ -73,9 +73,8 @@ export function generateLeadsIntroSalesChartData(
     // Get target for this specific month (for intro sales)
     const monthTarget = getIntroSalesTarget(year, month)
     
-    // Calculate target for new leads based on days in month
-    const daysInMonth = new Date(year, month + 1, 0).getDate()
-    const monthLeadsTarget = leadsPerDayTarget * daysInMonth
+    // Use fixed monthly target for new leads (238)
+    const monthLeadsTarget = newLeadsTarget
     
     // Format month label
     const monthLabel = formatMonthLabel(currentDate, targetYear)

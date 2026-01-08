@@ -33,22 +33,22 @@ interface DashboardProps {
 export function Dashboard({ month, year, summary, metrics, chartData, newMembersChartData, cumulativeMembersChartData, totalSalesChartData }: DashboardProps) {
   const monthNumber = getMonthNumber(month)
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#05060a]">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="border-b border-[rgba(148,163,255,0.12)] bg-[rgba(5,6,10,0.95)] backdrop-blur supports-[backdrop-filter]:bg-[rgba(5,6,10,0.6)]">
           <div className="flex h-16 items-center px-4">
             <div className="flex items-center gap-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-[#7dd3ff] to-[#a78bfa] text-[#05060a]">
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">
+                <h1 className="text-2xl font-bold tracking-tight text-[#f5f7ff]">
                   Performance Dashboard
                 </h1>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-[#9ca3ff]">
                   {month} {year} Report
                 </p>
               </div>
@@ -59,18 +59,18 @@ export function Dashboard({ month, year, summary, metrics, chartData, newMembers
         {/* Main Content */}
         <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
           {/* Summary Section */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+          <div className="rounded-lg border border-[rgba(148,163,255,0.12)] bg-gradient-to-br from-[rgba(15,23,42,0.9)] to-[rgba(15,23,42,0.96)] text-[#f5f7ff] shadow-[0_0_0_1px_rgba(148,163,255,0.12),0_35px_80px_rgba(15,23,42,0.8)] p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-[#7dd3ff] to-[#a78bfa] text-[#05060a]">
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-lg font-semibold text-[#f5f7ff]">
                 Executive Summary
               </h2>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-[#cbd5f5] leading-relaxed">
               {summary}
             </p>
           </div>

@@ -32,21 +32,21 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#05060a]">
       {!dashboardData && (
         <div className="flex min-h-screen items-center justify-center p-4">
           <div className="w-full max-w-4xl">
             <div className="mb-8 text-center">
               <div className="mb-6">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-gradient-to-br from-[#7dd3ff] to-[#a78bfa] text-[#05060a]">
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <h1 className="text-3xl font-bold tracking-tight">
+                <h1 className="text-3xl font-bold tracking-tight text-[#f5f7ff]">
                   Fitness Studio Analytics
                 </h1>
-                <p className="mt-2 text-muted-foreground">
+                <p className="mt-2 text-[#9ca3ff]">
                   Transform your data into actionable insights
                 </p>
               </div>
@@ -54,12 +54,13 @@ export default function Home() {
             <FileUpload onDataProcessed={handleDataProcessed} />
 
             <div className="mt-6 text-center">
-              <div className="mb-3 text-sm text-muted-foreground">
+              <div className="mb-3 text-sm text-[#9ca3ff]">
                 Or load the CSV files directly from the september-2025 folder:
               </div>
               <Button
                 onClick={handleLoadCSVFiles}
                 variant="outline"
+                className="border-[rgba(148,163,255,0.3)] text-[#cbd5f5] hover:bg-[rgba(15,23,42,0.5)]"
               >
                 Load CSV Files from Folder
               </Button>

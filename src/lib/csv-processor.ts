@@ -8,6 +8,7 @@ import {
   type CumulativeMembersChartDataPoint,
   type TotalSalesChartDataPoint
 } from './chart-data-processor'
+import { getMetricTarget, getMetricColor, type MetricType } from './metric-utils'
 
 export interface DashboardMetrics {
   newMembers: { value: number; change: number }
@@ -588,6 +589,136 @@ function calculatePercentageChange(current: number, previous: number): number {
   return Math.round(((current - previous) / previous) * 100)
 }
 
+// Generate dynamic executive summary based on metrics analysis
+function generateExecutiveSummary(metrics: DashboardMetrics, month: number, year: number): string {
+  const insights: string[] = []
+  
+  // Helper to get metric status
+  const getMetricStatus = (metricType: MetricType, value: number) => {
+    const target = getMetricTarget(metricType, month, year)
+    if (target === null) return null
+    const color = getMetricColor(metricType, value, month, year)
+    const percentage = (value / target) * 100
+    return { target, color, percentage }
+  }
+  
+  // Analyze sharp changes (>20% increase or decrease)
+  const sharpIncreases: string[] = []
+  const sharpDecreases: string[] = []
+  
+  if (Math.abs(metrics.introToMemberConversion.change) >= 20) {
+    if (metrics.introToMemberConversion.change > 0) {
+      sharpIncreases.push(`Intro-to-Member conversion surged ${metrics.introToMemberConversion.change}%`)
+    } else {
+      sharpDecreases.push(`Intro-to-Member conversion dropped ${Math.abs(metrics.introToMemberConversion.change)}%`)
+    }
+  }
+  
+  if (Math.abs(metrics.avgLeadsPerDay.change) >= 20) {
+    if (metrics.avgLeadsPerDay.change > 0) {
+      sharpIncreases.push(`Average leads per day increased ${metrics.avgLeadsPerDay.change}%`)
+    } else {
+      sharpDecreases.push(`Average leads per day decreased ${Math.abs(metrics.avgLeadsPerDay.change)}%`)
+    }
+  }
+  
+  if (Math.abs(metrics.totalSales.change) >= 15) {
+    if (metrics.totalSales.change > 0) {
+      sharpIncreases.push(`Total sales grew ${metrics.totalSales.change}%`)
+    } else {
+      sharpDecreases.push(`Total sales declined ${Math.abs(metrics.totalSales.change)}%`)
+    }
+  }
+  
+  if (Math.abs(metrics.newMembers.change) >= 20) {
+    if (metrics.newMembers.change > 0) {
+      sharpIncreases.push(`New members increased ${metrics.newMembers.change}%`)
+    } else {
+      sharpDecreases.push(`New members decreased ${Math.abs(metrics.newMembers.change)}%`)
+    }
+  }
+  
+  // Analyze target performance
+  const targetAnalysis: string[] = []
+  
+  const introsStatus = getMetricStatus('introsSold', metrics.introsSold.value)
+  if (introsStatus) {
+    if (introsStatus.color === 'red' && introsStatus.percentage < 70) {
+      targetAnalysis.push(`Intro sales are significantly below target at ${Math.round(introsStatus.percentage)}%`)
+    } else if (introsStatus.color === 'green' && introsStatus.percentage >= 100) {
+      targetAnalysis.push(`Intro sales exceeded target by ${Math.round(introsStatus.percentage - 100)}%`)
+    }
+  }
+  
+  const totalSalesStatus = getMetricStatus('totalSales', metrics.totalSales.value)
+  if (totalSalesStatus) {
+    if (totalSalesStatus.color === 'red' && totalSalesStatus.percentage < 70) {
+      targetAnalysis.push(`Total sales are well below target at ${Math.round(totalSalesStatus.percentage)}%`)
+    } else if (totalSalesStatus.color === 'green' && totalSalesStatus.percentage >= 100) {
+      targetAnalysis.push(`Total sales exceeded target`)
+    }
+  }
+  
+  const newMembersStatus = getMetricStatus('newMembers', metrics.newMembers.value)
+  if (newMembersStatus) {
+    if (newMembersStatus.color === 'green' && newMembersStatus.percentage >= 100) {
+      targetAnalysis.push(`New members exceeded target`)
+    } else if (newMembersStatus.color === 'red' && newMembersStatus.percentage < 70) {
+      targetAnalysis.push(`New members are below target at ${Math.round(newMembersStatus.percentage)}%`)
+    }
+  }
+  
+  const avgLeadsStatus = getMetricStatus('avgLeadsPerDay', metrics.avgLeadsPerDay.value)
+  if (avgLeadsStatus) {
+    if (avgLeadsStatus.color === 'green' && avgLeadsStatus.percentage >= 100) {
+      targetAnalysis.push(`Average leads per day met or exceeded target`)
+    } else if (avgLeadsStatus.color === 'red') {
+      targetAnalysis.push(`Average leads per day is below target at ${Math.round(avgLeadsStatus.percentage)}%`)
+    }
+  }
+  
+  // Cancellations analysis (lower is better)
+  if (metrics.membershipCancellations.value <= 12) {
+    targetAnalysis.push(`Membership cancellations are at a healthy level (${metrics.membershipCancellations.value})`)
+  } else if (metrics.membershipCancellations.value >= 16) {
+    targetAnalysis.push(`Membership cancellations are elevated at ${metrics.membershipCancellations.value}`)
+  }
+  
+  // Build summary
+  if (sharpIncreases.length > 0) {
+    insights.push(sharpIncreases.join(', ') + '.')
+  }
+  
+  if (sharpDecreases.length > 0) {
+    insights.push(sharpDecreases.join(', ') + '.')
+  }
+  
+  if (targetAnalysis.length > 0) {
+    insights.push(targetAnalysis.join('. ') + '.')
+  }
+  
+  // Add conversion rate insights
+  if (metrics.introToMemberConversion.value >= 30) {
+    insights.push(`Strong intro-to-member conversion rate at ${metrics.introToMemberConversion.value.toFixed(1)}%`)
+  } else if (metrics.introToMemberConversion.value < 20) {
+    insights.push(`Intro-to-member conversion needs attention at ${metrics.introToMemberConversion.value.toFixed(1)}%`)
+  }
+  
+  if (metrics.leadToIntroConversion.value >= 35) {
+    insights.push(`Lead-to-intro conversion is performing well at ${metrics.leadToIntroConversion.value.toFixed(1)}%`)
+  } else if (metrics.leadToIntroConversion.value < 25) {
+    insights.push(`Lead-to-intro conversion could be improved (currently ${metrics.leadToIntroConversion.value.toFixed(1)}%)`)
+  }
+  
+  // If no specific insights, provide general overview
+  if (insights.length === 0) {
+    return `Performance this month shows steady metrics across key indicators. All metrics are within expected ranges with moderate month-over-month changes.`
+  }
+  
+  return insights.join(' ') + (insights.length > 0 ? ' Overall, the month shows ' : '') + 
+    (metrics.totalSales.change > 0 ? 'positive momentum' : metrics.totalSales.change < 0 ? 'areas needing attention' : 'stable performance') + '.'
+}
+
 // Function to process actual CSV data (to be used when files are uploaded)
 export function processCSVData(
   membershipSales: string,
@@ -667,7 +798,7 @@ export function processCSVData(
     }
   }
   
-  const summary = "Data processed from CSV files for September 2025. Metrics calculated based on the specified criteria for each KPI, with month-over-month changes calculated from August 2025 data."
+  const summary = generateExecutiveSummary(metrics, month, year)
 
   // Generate chart data for the leads vs intro sales chart
   const chartData = generateLeadsIntroSalesChartData(introSales, leadsCustomers, month, year)

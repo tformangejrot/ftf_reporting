@@ -3,6 +3,8 @@ import {
   getClassPacksTarget,
   getTotalSalesTarget,
   getLeadsPerDayTarget,
+  getTotalMembershipsTarget,
+  getCancellationsThresholds,
   getHighIsGoodThresholds,
 } from './targets'
 
@@ -179,6 +181,43 @@ export function getColorVariant(color: MetricColor): "default" | "success" | "wa
       return 'neutral'
     default:
       return 'default'
+  }
+}
+
+/**
+ * Get the target value for a metric type
+ */
+export function getMetricTarget(
+  metricType: MetricType,
+  month?: number,
+  year?: number
+): number | null {
+  if (month === undefined || year === undefined) {
+    // Return static threshold for metrics without dynamic targets
+    const thresholds = METRIC_THRESHOLDS[metricType]
+    return thresholds ? thresholds.green : null
+  }
+
+  switch (metricType) {
+    case 'introsSold':
+      return getIntroSalesTarget(year, month)
+    case 'packSales':
+      return getClassPacksTarget(year, month)
+    case 'totalSales':
+      return getTotalSalesTarget(year, month)
+    case 'avgLeadsPerDay':
+      return getLeadsPerDayTarget()
+    case 'newMembers':
+      return getTotalMembershipsTarget(year, month)
+    case 'membershipCancellations':
+      return getCancellationsThresholds().target
+    case 'leadToIntroConversion':
+    case 'introToMemberConversion':
+    case 'introToPackConversion':
+      // These use static thresholds
+      return METRIC_THRESHOLDS[metricType]?.green ?? null
+    default:
+      return null
   }
 }
 
