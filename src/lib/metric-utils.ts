@@ -139,6 +139,42 @@ export function getMetricColor(
         return 'red'
       }
     }
+    
+    if (metricType === 'newMembers') {
+      const target = 30 // Target for new members
+      const thresholds = getHighIsGoodThresholds(target)
+      if (value >= thresholds.greenThreshold) {
+        return 'green'
+      } else if (value >= thresholds.yellowThreshold) {
+        return 'yellow'
+      } else {
+        return 'red'
+      }
+    }
+    
+    if (metricType === 'leadToIntroConversion') {
+      const target = 40 // Target for lead to intro conversion percentage
+      const thresholds = getHighIsGoodThresholds(target)
+      if (value >= thresholds.greenThreshold) {
+        return 'green'
+      } else if (value >= thresholds.yellowThreshold) {
+        return 'yellow'
+      } else {
+        return 'red'
+      }
+    }
+    
+    if (metricType === 'introToMemberConversion') {
+      const target = 33 // Target for intro to member conversion percentage
+      const thresholds = getHighIsGoodThresholds(target)
+      if (value >= thresholds.greenThreshold) {
+        return 'green'
+      } else if (value >= thresholds.yellowThreshold) {
+        return 'yellow'
+      } else {
+        return 'red'
+      }
+    }
   }
 
   // Membership cancellations: lower is better
@@ -208,7 +244,7 @@ export function getMetricTarget(
     case 'avgLeadsPerDay':
       return getLeadsPerDayTarget()
     case 'newMembers':
-      return getTotalMembershipsTarget(year, month)
+      return 30 // Target for new members (not total memberships)
     case 'membershipCancellations':
       return getCancellationsThresholds().target
     case 'leadToIntroConversion':

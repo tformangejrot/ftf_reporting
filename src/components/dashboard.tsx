@@ -87,81 +87,105 @@ export function Dashboard({ month, year, summary, metrics, chartData, newMembers
               </TabsList>
             </div>
           
-            <TabsContent value="dashboard" className="space-y-4">
-              {/* Metrics Grid */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <MetricCard
-                  title="New Members"
-                  value={metrics.newMembers.value}
-                  change={metrics.newMembers.change}
-                  metricType="newMembers"
-                  month={monthNumber}
-                  year={year}
-                />
-                <MetricCard
-                  title="Lead to Intro Conversion"
-                  value={`${metrics.leadToIntroConversion.value}%`}
-                  change={metrics.leadToIntroConversion.change}
-                  metricType="leadToIntroConversion"
-                  month={monthNumber}
-                  year={year}
-                />
-                <MetricCard
-                  title="Intros Sold"
-                  value={metrics.introsSold.value}
-                  change={metrics.introsSold.change}
-                  metricType="introsSold"
-                  month={monthNumber}
-                  year={year}
-                />
-                <MetricCard
-                  title="Intro to Member Conversion"
-                  value={`${metrics.introToMemberConversion.value}%`}
-                  change={metrics.introToMemberConversion.change}
-                  metricType="introToMemberConversion"
-                  month={monthNumber}
-                  year={year}
-                />
-                <MetricCard
-                  title="Total Sales"
-                  value={metrics.totalSales.value}
-                  change={metrics.totalSales.change}
-                  metricType="totalSales"
-                  month={monthNumber}
-                  year={year}
-                />
-                <MetricCard
-                  title="Avg. Leads per Day"
-                  value={metrics.avgLeadsPerDay.value}
-                  change={metrics.avgLeadsPerDay.change}
-                  metricType="avgLeadsPerDay"
-                  month={monthNumber}
-                  year={year}
-                />
-                <MetricCard
-                  title="Intro to Pack Conversion"
-                  value={`${metrics.introToPackConversion.value}%`}
-                  change={metrics.introToPackConversion.change}
-                  metricType="introToPackConversion"
-                  month={monthNumber}
-                  year={year}
-                />
-                <MetricCard
-                  title="Pack Sales"
-                  value={metrics.packSales.value}
-                  change={metrics.packSales.change}
-                  metricType="packSales"
-                  month={monthNumber}
-                  year={year}
-                />
-                <MetricCard
-                  title="Membership Cancellations"
-                  value={metrics.membershipCancellations.value}
-                  change={metrics.membershipCancellations.change}
-                  metricType="membershipCancellations"
-                  month={monthNumber}
-                  year={year}
-                />
+            <TabsContent value="dashboard" className="space-y-6">
+              {/* Group 1: Leads & Intros */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-[#7dd3ff] uppercase tracking-wide">Leads & Intros</h3>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <MetricCard
+                    title="Avg. Leads per Day"
+                    value={metrics.avgLeadsPerDay.value}
+                    change={metrics.avgLeadsPerDay.change}
+                    metricType="avgLeadsPerDay"
+                    month={monthNumber}
+                    year={year}
+                  />
+                  <MetricCard
+                    title="Intros Sold"
+                    value={metrics.introsSold.value}
+                    change={metrics.introsSold.change}
+                    metricType="introsSold"
+                    month={monthNumber}
+                    year={year}
+                  />
+                  <MetricCard
+                    title="Lead to Intro Conversion"
+                    value={`${metrics.leadToIntroConversion.value}%`}
+                    change={metrics.leadToIntroConversion.change}
+                    metricType="leadToIntroConversion"
+                    month={monthNumber}
+                    year={year}
+                  />
+                </div>
+              </div>
+
+              {/* Group 2: Members */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-[#7dd3ff] uppercase tracking-wide">Members</h3>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <MetricCard
+                    title="New Members"
+                    value={metrics.newMembers.value}
+                    change={metrics.newMembers.change}
+                    metricType="newMembers"
+                    month={monthNumber}
+                    year={year}
+                  />
+                  <MetricCard
+                    title="Intro to Member Conversion"
+                    value={`${metrics.introToMemberConversion.value}%`}
+                    change={metrics.introToMemberConversion.change}
+                    metricType="introToMemberConversion"
+                    month={monthNumber}
+                    year={year}
+                  />
+                  <MetricCard
+                    title="Membership Cancellations"
+                    value={metrics.membershipCancellations.value}
+                    change={metrics.membershipCancellations.change}
+                    metricType="membershipCancellations"
+                    month={monthNumber}
+                    year={year}
+                  />
+                </div>
+              </div>
+
+              {/* Group 3: Packs */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-[#7dd3ff] uppercase tracking-wide">Packs</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <MetricCard
+                    title="Pack Sales"
+                    value={metrics.packSales.value}
+                    change={metrics.packSales.change}
+                    metricType="packSales"
+                    month={monthNumber}
+                    year={year}
+                  />
+                  <MetricCard
+                    title="Intro to Pack Conversion"
+                    value={`${metrics.introToPackConversion.value}%`}
+                    change={metrics.introToPackConversion.change}
+                    metricType="introToPackConversion"
+                    month={monthNumber}
+                    year={year}
+                  />
+                </div>
+              </div>
+
+              {/* Group 4: Sales */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-[#7dd3ff] uppercase tracking-wide">Sales</h3>
+                <div className="grid gap-4">
+                  <MetricCard
+                    title="Total Sales"
+                    value={metrics.totalSales.value}
+                    change={metrics.totalSales.change}
+                    metricType="totalSales"
+                    month={monthNumber}
+                    year={year}
+                  />
+                </div>
               </div>
             </TabsContent>
             
