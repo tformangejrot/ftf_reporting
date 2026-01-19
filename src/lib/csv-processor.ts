@@ -442,10 +442,26 @@ function categorizeSale(category: string, item: string): string {
   }
   
   if (category === "Pack") {
-    if (item === "New Flyer 3 Class Pack") {
+    // Specific pack items that count as pack sales
+    const packItems = [
+      "10 Class Package",
+      "15 Class Package ",
+      "5 Class Package - 11",
+      "5 Class Package - 15",
+      "10 Spot Rental Package"
+    ]
+    
+    if (packItems.includes(item)) {
+      return "pack"
+    }
+    
+    // New Flyer packs are intro offers
+    if (item === "New Flyer 3 Class Pack" || item === "New Flyer 6 Class Pack") {
       return "intro"
     }
-    return "pack"
+    
+    // Everything else is other
+    return "other"
   }
   
   if (category === "Product" || category === "Payment plan installment" || category === "Gift card" || 
