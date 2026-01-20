@@ -209,10 +209,11 @@ function categorizeSale(category: string, item: string): string {
   }
   
   if (category === "Pack") {
-    // Specific pack items that count as pack sales
+    // Specific pack items that count as pack sales (multi-class & multi-spot packs)
     const packItems = [
       "10 Class Package",
       "15 Class Package ",
+      "30 Class Package",
       "5 Class Package - 11",
       "5 Class Package - 15",
       "10 Spot Rental Package"

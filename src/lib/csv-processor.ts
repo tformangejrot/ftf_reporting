@@ -442,10 +442,11 @@ function categorizeSale(category: string, item: string): string {
   }
   
   if (category === "Pack") {
-    // Specific pack items that count as pack sales
+    // Specific pack items that count as pack sales (multi-class & multi-spot packs)
     const packItems = [
       "10 Class Package",
       "15 Class Package ",
+      "30 Class Package",
       "5 Class Package - 11",
       "5 Class Package - 15",
       "10 Spot Rental Package"
@@ -517,56 +518,31 @@ function getActiveMembershipEmails(csvContent: string, month: number, year: numb
   return emails
 }
 
-export function calculateMembershipCancellations(
-  membershipSalesWithRenewals: string,
+// New helpers: direct cancellation counts from cancellation report CSV
+export function calculateMembershipCancellationsFromReport(
+  cancellationsCSV: string,
   month: number,
   year: number
 ): number {
-  const prevMonth = month === 0 ? 11 : month - 1
-  const prevYear = month === 0 ? year - 1 : year
-  
-  // Get emails from previous month
-  const prevMonthEmails = getActiveMembershipEmails(membershipSalesWithRenewals, prevMonth, prevYear)
-  
-  // Get emails from current month
-  const currentMonthEmails = getActiveMembershipEmails(membershipSalesWithRenewals, month, year)
-  
-  // Count emails that were in previous month but not in current month
-  let cancellations = 0
-  prevMonthEmails.forEach(email => {
-    if (!currentMonthEmails.has(email)) {
-      cancellations++
-    }
-  })
-  
-  return cancellations
+  const data = parseCSV(cancellationsCSV)
+  return data.filter(row => {
+    const date = parseCSVDate(row['Cancelled at'])
+    return isInMonth(date, month, year)
+  }).length
 }
 
-export function calculateMembershipCancellationsPrev(
-  membershipSalesWithRenewals: string,
+export function calculateMembershipCancellationsPrevFromReport(
+  cancellationsCSV: string,
   month: number,
   year: number
 ): number {
+  const data = parseCSV(cancellationsCSV)
   const prevMonth = month === 0 ? 11 : month - 1
   const prevYear = month === 0 ? year - 1 : year
-  const prevPrevMonth = prevMonth === 0 ? 11 : prevMonth - 1
-  const prevPrevYear = prevMonth === 0 ? prevYear - 1 : prevYear
-  
-  // Get emails from month before previous
-  const prevPrevMonthEmails = getActiveMembershipEmails(membershipSalesWithRenewals, prevPrevMonth, prevPrevYear)
-  
-  // Get emails from previous month
-  const prevMonthEmails = getActiveMembershipEmails(membershipSalesWithRenewals, prevMonth, prevYear)
-  
-  // Count emails that were in prev-prev month but not in previous month
-  let cancellations = 0
-  prevPrevMonthEmails.forEach(email => {
-    if (!prevMonthEmails.has(email)) {
-      cancellations++
-    }
-  })
-  
-  return cancellations
+  return data.filter(row => {
+    const date = parseCSVDate(row['Cancelled at'])
+    return isInMonth(date, prevMonth, prevYear)
+  }).length
 }
 
 // Main processing function
@@ -743,6 +719,7 @@ export function processCSVData(
   introConversions: string,
   payments: string,
   membershipSalesWithRenewals: string,
+  membershipCancellationsCSV: string,
   month: number,
   year: number
 ): ProcessedCSVData {
@@ -758,7 +735,7 @@ export function processCSVData(
   const introToPackConversion = calculateIntroToPackConversion(introConversions, month, year, totalIntroSalesForPeriod)
   const totalSales = calculateTotalSales(payments, month, year)
   const packSales = calculatePackSales(payments, month, year)
-  const membershipCancellations = calculateMembershipCancellations(membershipSalesWithRenewals, month, year)
+  const membershipCancellations = calculateMembershipCancellationsFromReport(membershipCancellationsCSV, month, year)
   
   // Calculate previous month metrics
   const newMembersPrev = calculateNewMembersPrev(membershipSales, month, year)
@@ -772,7 +749,7 @@ export function processCSVData(
   const introToPackConversionPrev = calculateIntroToPackConversionPrev(introConversions, month, year, totalIntroSalesForPeriodPrev)
   const totalSalesPrev = calculateTotalSalesPrev(payments, month, year)
   const packSalesPrev = calculatePackSalesPrev(payments, month, year)
-  const membershipCancellationsPrev = calculateMembershipCancellationsPrev(membershipSalesWithRenewals, month, year)
+  const membershipCancellationsPrev = calculateMembershipCancellationsPrevFromReport(membershipCancellationsCSV, month, year)
   
   // Calculate percentage changes
   const metrics: DashboardMetrics = {

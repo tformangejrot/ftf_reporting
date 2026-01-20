@@ -37,6 +37,11 @@ export async function loadAndProcessCSVFiles(): Promise<ProcessedCSVData> {
       'utf-8'
     )
     
+    const membershipCancellationsCSV = fs.readFileSync(
+      path.join(csvDir, 'momence--membership-sales-export_cancel.csv'),
+      'utf-8'
+    )
+    
     // Process the data (September 2025 = month 8, year 2025)
     const processedData = processCSVData(
       membershipSales,
@@ -45,6 +50,7 @@ export async function loadAndProcessCSVFiles(): Promise<ProcessedCSVData> {
       introConversions,
       payments,
       membershipSalesWithRenewals,
+      membershipCancellationsCSV,
       8, // September (0-indexed)
       2025
     )

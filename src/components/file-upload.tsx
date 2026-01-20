@@ -29,6 +29,12 @@ const REQUIRED_FILES = [
     description: 'For total membership count including renewals'
   },
   {
+    key: 'membershipCancellations',
+    name: 'Membership Cancellations',
+    filename: 'momence--membership-sales-export_cancel.csv',
+    description: 'For direct membership cancellation counts'
+  },
+  {
     key: 'introSales',
     name: 'Intro Offers Sales',
     filename: 'momence-intro-offers-sales-report.csv',
@@ -151,7 +157,8 @@ export function FileUpload({ onDataProcessed }: FileUploadProps) {
         leadsCustomers,
         introConversions,
         payments,
-        membershipSalesWithRenewals
+        membershipSalesWithRenewals,
+        membershipCancellations
       } = fileContents
 
       if (
@@ -160,7 +167,8 @@ export function FileUpload({ onDataProcessed }: FileUploadProps) {
         !leadsCustomers ||
         !introConversions ||
         !payments ||
-        !membershipSalesWithRenewals
+        !membershipSalesWithRenewals ||
+        !membershipCancellations
       ) {
         throw new Error('Unable to read one or more required CSV files')
       }
@@ -174,6 +182,7 @@ export function FileUpload({ onDataProcessed }: FileUploadProps) {
         introConversions,
         payments,
         membershipSalesWithRenewals,
+        membershipCancellations,
         monthNumber,
         dateSelection.year
       )
