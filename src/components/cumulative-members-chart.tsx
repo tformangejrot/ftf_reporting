@@ -1,13 +1,13 @@
 import {
-  BarChart,
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ReferenceLine,
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CumulativeMembersChartDataPoint } from "@/lib/chart-data-processor"
@@ -30,7 +30,7 @@ export function CumulativeMembersChart({ data }: CumulativeMembersChartProps) {
         </p>
         <div className="h-96 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+            <ComposedChart
               data={data}
               margin={{
                 top: 20,
@@ -73,14 +73,17 @@ export function CumulativeMembersChart({ data }: CumulativeMembersChartProps) {
               />
               <Legend wrapperStyle={{ color: '#cbd5f5' }} />
               
-              {/* Target Line */}
+              {/* Target Line - varies by month */}
               {data.length > 0 && data[0].targetTotalMembers !== undefined && (
-                <ReferenceLine 
-                  y={data[0].targetTotalMembers} 
-                  stroke="#7dd3ff" 
+                <Line
+                  type="monotone"
+                  dataKey="targetTotalMembers"
+                  name="Target"
+                  stroke="#7dd3ff"
                   strokeDasharray="5 5"
                   strokeWidth={2}
-                  label={{ value: `Target Total Members (${data[0].targetTotalMembers})`, position: "top", fill: '#7dd3ff' }}
+                  dot={false}
+                  connectNulls
                 />
               )}
               

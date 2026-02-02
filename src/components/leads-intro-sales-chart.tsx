@@ -1,13 +1,13 @@
 import {
   ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ReferenceLine,
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -79,22 +79,28 @@ export function LeadsIntroSalesChart({ data }: LeadsIntroSalesChartProps) {
               />
               <Legend wrapperStyle={{ color: '#cbd5f5' }} />
               
-              {/* Target Lines - use the last data point's targets (which is the selected month) */}
+              {/* Target Lines - vary by month */}
               {data.length > 0 && (
                 <>
-                  <ReferenceLine 
-                    y={data[data.length - 1].targetIntroSales} 
-                    stroke="#7dd3ff" 
+                  <Line
+                    type="monotone"
+                    dataKey="targetIntroSales"
+                    name="Target Intro Sales"
+                    stroke="#7dd3ff"
                     strokeDasharray="5 5"
                     strokeWidth={2}
-                    label={{ value: `Target Intro Sales (${data[data.length - 1].targetIntroSales})`, position: "top", fill: '#7dd3ff' }}
+                    dot={false}
+                    connectNulls
                   />
-                  <ReferenceLine 
-                    y={data[data.length - 1].targetNewLeads} 
-                    stroke="#f59e0b" 
+                  <Line
+                    type="monotone"
+                    dataKey="targetNewLeads"
+                    name="Target New Leads"
+                    stroke="#f59e0b"
                     strokeDasharray="5 5"
                     strokeWidth={2}
-                    label={{ value: `Target New Leads (${data[data.length - 1].targetNewLeads})`, position: "top", fill: '#f59e0b' }}
+                    dot={false}
+                    connectNulls
                   />
                 </>
               )}

@@ -138,9 +138,6 @@ export function generateCumulativeMembersChartData(
   
   const chartData: CumulativeMembersChartDataPoint[] = []
   
-  // Get target for the selected month (targetMonth/targetYear)
-  const selectedMonthTarget = getTotalMembershipsTarget(targetYear, targetMonth)
-  
   // Generate 13 months of data starting from the same month the prior year
   for (let i = -12; i <= 0; i++) {
     const currentDate = new Date(targetYear, targetMonth, 1)
@@ -148,6 +145,9 @@ export function generateCumulativeMembersChartData(
     
     const year = currentDate.getFullYear()
     const month = currentDate.getMonth()
+    
+    // Get target for this specific month (varies by month; pre-2026 uses Dec 2025 target)
+    const monthTarget = getTotalMembershipsTarget(year, month)
     
     // Count all memberships (with renewals) for this month
     const totalMembers = allMembershipData.filter(row => {
@@ -172,7 +172,7 @@ export function generateCumulativeMembersChartData(
       retainedMembers,
       newMembers,
       totalMembers,
-      targetTotalMembers: selectedMonthTarget
+      targetTotalMembers: monthTarget
     })
   }
   
@@ -209,22 +209,23 @@ function categorizeSale(category: string, item: string): string {
   }
   
   if (category === "Pack") {
+    const trimmed = item?.trim() ?? ""
     // Specific pack items that count as pack sales (multi-class & multi-spot packs)
     const packItems = [
       "10 Class Package",
-      "15 Class Package ",
+      "15 Class Package",
       "30 Class Package",
       "5 Class Package - 11",
       "5 Class Package - 15",
       "10 Spot Rental Package"
     ]
     
-    if (packItems.includes(item)) {
+    if (packItems.includes(trimmed)) {
       return "pack"
     }
     
     // New Flyer packs are intro offers
-    if (item === "New Flyer 3 Class Pack" || item === "New Flyer 6 Class Pack") {
+    if (trimmed === "New Flyer 3 Class Pack" || trimmed === "New Flyer 6 Class Pack") {
       return "intro"
     }
     
@@ -252,9 +253,6 @@ export function generateTotalSalesChartData(
   
   const chartData: TotalSalesChartDataPoint[] = []
   
-  // Get target for the selected month (targetMonth/targetYear)
-  const selectedMonthTarget = getTotalSalesTarget(targetYear, targetMonth)
-  
   // Generate 13 months of data starting from the same month the prior year
   for (let i = -12; i <= 0; i++) {
     const currentDate = new Date(targetYear, targetMonth, 1)
@@ -262,6 +260,9 @@ export function generateTotalSalesChartData(
     
     const year = currentDate.getFullYear()
     const month = currentDate.getMonth()
+    
+    // Get target for this specific month (varies by month; pre-2026 uses Dec 2025 target)
+    const monthTarget = getTotalSalesTarget(year, month)
     
     // Filter payments for this month and successful payments only
     // Supports both "Date" (old format) and "Payment date" (new format)
@@ -312,7 +313,7 @@ export function generateTotalSalesChartData(
       month: monthLabel,
       ...categories,
       totalSales,
-      targetTotalSales: selectedMonthTarget
+      targetTotalSales: monthTarget
     })
     
     if (year === targetYear && month === targetMonth) {

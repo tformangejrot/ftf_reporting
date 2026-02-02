@@ -84,35 +84,42 @@ export interface TargetThresholds {
   greenThreshold: number
 }
 
+// For months before Dec 2025, use Dec 2025 target (user preference for "anything preceding 2026")
+const PRE_2026_KEY = '2025-11'
+
 /**
  * Get the target for intro sales for a given month/year
+ * Months before Dec 2025 use the Dec 2025 target
  */
 export function getIntroSalesTarget(year: number, month: number): number {
-  const key = `${year}-${month}`
+  const key = year < 2026 ? PRE_2026_KEY : `${year}-${month}`
   return INTRO_SALES_TARGETS[key] ?? DEFAULT_INTRO_SALES
 }
 
 /**
  * Get the target for total memberships for a given month/year
+ * Months before Dec 2025 use the Dec 2025 target
  */
 export function getTotalMembershipsTarget(year: number, month: number): number {
-  const key = `${year}-${month}`
+  const key = year < 2026 ? PRE_2026_KEY : `${year}-${month}`
   return TOTAL_MEMBERSHIPS_TARGETS[key] ?? DEFAULT_TOTAL_MEMBERSHIPS
 }
 
 /**
  * Get the target for class packs for a given month/year
+ * Months before Dec 2025 use the Dec 2025 target
  */
 export function getClassPacksTarget(year: number, month: number): number {
-  const key = `${year}-${month}`
+  const key = year < 2026 ? PRE_2026_KEY : `${year}-${month}`
   return CLASS_PACKS_TARGETS[key] ?? DEFAULT_CLASS_PACKS
 }
 
 /**
  * Get the target for total sales for a given month/year
+ * Months before Dec 2025 use the Dec 2025 target
  */
 export function getTotalSalesTarget(year: number, month: number): number {
-  const key = `${year}-${month}`
+  const key = year < 2026 ? PRE_2026_KEY : `${year}-${month}`
   return TOTAL_SALES_TARGETS[key] ?? DEFAULT_TOTAL_SALES
 }
 

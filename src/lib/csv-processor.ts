@@ -447,22 +447,23 @@ function categorizeSale(category: string, item: string): string {
   }
   
   if (category === "Pack") {
+    const trimmed = item?.trim() ?? ""
     // Specific pack items that count as pack sales (multi-class & multi-spot packs)
     const packItems = [
       "10 Class Package",
-      "15 Class Package ",
+      "15 Class Package",
       "30 Class Package",
       "5 Class Package - 11",
       "5 Class Package - 15",
       "10 Spot Rental Package"
     ]
     
-    if (packItems.includes(item)) {
+    if (packItems.includes(trimmed)) {
       return "pack"
     }
     
     // New Flyer packs are intro offers
-    if (item === "New Flyer 3 Class Pack" || item === "New Flyer 6 Class Pack") {
+    if (trimmed === "New Flyer 3 Class Pack" || trimmed === "New Flyer 6 Class Pack") {
       return "intro"
     }
     
