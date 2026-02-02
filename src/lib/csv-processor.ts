@@ -161,6 +161,11 @@ export function parseCSV(csvContent: string): CSVRow[] {
   }).filter((row): row is CSVRow => row !== null)
 }
 
+// Helper to get payment date from row - supports both "Date" (old format) and "Payment date" (new format)
+function getPaymentDate(row: CSVRow): string {
+  return row['Payment date'] ?? row['Date'] ?? ''
+}
+
 // Metric calculation functions
 export function calculateNewMembers(csvContent: string, month: number, year: number): number {
   const data = parseCSV(csvContent)
@@ -384,7 +389,7 @@ export function calculateTotalSales(csvContent: string, month: number, year: num
   const data = parseCSV(csvContent)
   
   const monthSales = data.filter(row => {
-    const date = parseCSVDate(row['Date'])
+    const date = parseCSVDate(getPaymentDate(row))
     return isInMonth(date, month, year) && row['Payment status'] === 'Succeeded'
   }).reduce((total, row) => {
     const saleValue = parseFloat(row['Sale value']) || 0
@@ -401,7 +406,7 @@ export function calculateTotalSalesPrev(csvContent: string, month: number, year:
   const prevYear = month === 0 ? year - 1 : year
   
   const prevMonthSales = data.filter(row => {
-    const date = parseCSVDate(row['Date'])
+    const date = parseCSVDate(getPaymentDate(row))
     return isInMonth(date, prevMonth, prevYear) && row['Payment status'] === 'Succeeded'
   }).reduce((total, row) => {
     const saleValue = parseFloat(row['Sale value']) || 0
@@ -478,7 +483,7 @@ export function calculatePackSales(csvContent: string, month: number, year: numb
   const data = parseCSV(csvContent)
   
   return data.filter(row => {
-    const date = parseCSVDate(row['Date'])
+    const date = parseCSVDate(getPaymentDate(row))
     return isInMonth(date, month, year) && row['Payment status'] === 'Succeeded'
   }).filter(row => {
     const category = categorizeSale(row['Category'], row['Item'])
@@ -492,7 +497,7 @@ export function calculatePackSalesPrev(csvContent: string, month: number, year: 
   const prevYear = month === 0 ? year - 1 : year
   
   return data.filter(row => {
-    const date = parseCSVDate(row['Date'])
+    const date = parseCSVDate(getPaymentDate(row))
     return isInMonth(date, prevMonth, prevYear) && row['Payment status'] === 'Succeeded'
   }).filter(row => {
     const category = categorizeSale(row['Category'], row['Item'])

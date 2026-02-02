@@ -264,8 +264,10 @@ export function generateTotalSalesChartData(
     const month = currentDate.getMonth()
     
     // Filter payments for this month and successful payments only
+    // Supports both "Date" (old format) and "Payment date" (new format)
     const monthPayments = paymentsData.filter(row => {
-      const date = parseCSVDate(row['Date'])
+      const dateStr = row['Payment date'] ?? row['Date'] ?? ''
+      const date = parseCSVDate(dateStr)
       return isInMonth(date, month, year) && row['Payment status'] === 'Succeeded'
     })
     
