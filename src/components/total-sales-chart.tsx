@@ -137,7 +137,7 @@ export function TotalSalesChart({ data }: TotalSalesChartProps) {
                 fill="#6b7280"
                 radius={[4, 4, 4, 4]}
               />
-            </BarChart>
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       </CardContent>

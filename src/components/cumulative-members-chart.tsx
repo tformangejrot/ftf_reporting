@@ -104,7 +104,7 @@ export function CumulativeMembersChart({ data }: CumulativeMembersChartProps) {
                 fill="#3b82f6"
                 radius={[4, 4, 0, 0]}
               />
-            </BarChart>
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
