@@ -64,16 +64,18 @@ export function isInMonth(date: Date | null, targetMonth: number, targetYear: nu
 
 export function isInThreeMonthPeriod(date: Date | null, startMonth: number, targetYear: number): boolean {
   if (!date) return false
-  const year = date.getFullYear()
-  const month = date.getMonth()
-  return year === targetYear && (month >= startMonth && month <= startMonth + 2)
+  // Use a real date range so windows that cross year boundaries
+  // (e.g. Dec-Jan-Feb) are handled correctly.
+  const periodStart = new Date(targetYear, startMonth, 1)
+  const periodEnd = new Date(targetYear, startMonth + 3, 1)
+  return date >= periodStart && date < periodEnd
 }
 
 export function isInThreeMonthPeriodPrev(date: Date | null, startMonth: number, targetYear: number): boolean {
   if (!date) return false
-  const year = date.getFullYear()
-  const month = date.getMonth()
-  return year === targetYear && (month >= startMonth - 1 && month <= startMonth + 1)
+  const periodStart = new Date(targetYear, startMonth - 1, 1)
+  const periodEnd = new Date(targetYear, startMonth + 2, 1)
+  return date >= periodStart && date < periodEnd
 }
 
 // Helper function to get month number from month name
